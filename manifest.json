@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "NotebookLM → PDF (with Math)",
+  "version": "0.1.0",
+  "description": "Export NotebookLM chat/notes to PDF with properly rendered math (KaTeX).",
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["https://notebooklm.google.com/*"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "How to export",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://notebooklm.google.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "styles/*",
+        "vendor/katex/*",
+        "print.html",
+        "print.js"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

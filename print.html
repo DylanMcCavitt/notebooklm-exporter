@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>NotebookLM → PDF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="vendor/katex/katex.min.css" />
+  <link rel="preload" as="font" href="vendor/katex/fonts/KaTeX_Main-Regular.woff2" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="styles/print.css" />
+</head>
+<body>
+  <header id="header">
+    <div id="doc-title"></div>
+    <div id="doc-meta"></div>
+    <div id="controls">
+      <button id="btn-print">Print / Save as PDF</button>
+      <button id="btn-save" title="One-click download (client-side PDF)">Download PDF</button>
+    </div>
+  </header>
+
+  <article id="content" aria-label="NotebookLM export"></article>
+
+  <!-- Bundled libraries -->
+  <script src="vendor/katex/katex.min.js"></script>
+  <script src="vendor/katex/contrib/auto-render.min.js"></script>
+  <script src="vendor/html2pdf/html2pdf.bundle.min.js"></script>
+  <script type="module" src="print.js"></script>
+</body>
+</html>

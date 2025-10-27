@@ -1,0 +1,22 @@
+# Node / tooling
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build artifacts / packaged outputs
+dist/
+build/
+*.crx
+*.pem
+*.zip
+
+# Misc
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.log
+coverage/
+tmp/

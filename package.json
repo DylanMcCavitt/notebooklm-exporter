@@ -1,0 +1,13 @@
+{
+  "name": "notebooklm-exporter",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "vendor:refresh": "rm -rf vendor && mkdir -p vendor/katex/contrib vendor/katex/fonts vendor/html2pdf && cp node_modules/katex/dist/katex.min.js vendor/katex/ && cp node_modules/katex/dist/contrib/auto-render.min.js vendor/katex/contrib/ && cp node_modules/katex/dist/katex.min.css vendor/katex/ && cp node_modules/katex/dist/fonts/* vendor/katex/fonts/ && cp node_modules/html2pdf.js/dist/html2pdf.bundle.min.js vendor/html2pdf/",
+    "pack": "bash scripts/pack.sh"
+  },
+  "devDependencies": {
+    "html2pdf.js": "^0.10.1",
+    "katex": "^0.16.9"
+  }
+}

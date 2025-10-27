@@ -1,0 +1,56 @@
+:root { --max: 1024px; }
+body {
+  font: 16px/1.55 "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #111;
+  margin: 0;
+  background: #fff;
+}
+#header {
+  position: sticky; top: 0; background: #fafafa; border-bottom: 1px solid #e6e6e6;
+  padding: 10px 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+}
+#doc-title { font-weight: 600; }
+#doc-meta { color: #666; font-size: 12px; }
+#controls { margin-left: auto; display: flex; gap: 8px; }
+#controls button { padding: 8px 10px; border: 1px solid #ddd; background: white; cursor: pointer; }
+
+#content {
+  max-width: var(--max);
+  margin: 24px auto 60px;
+  padding: 0 24px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+#content h1, #content h2, #content h3 { margin-top: 1.4em; line-height: 1.35; }
+#content p { margin: 0.65em 0; }
+#content ul, #content ol { margin: 0.65em 0; padding-left: 28px; }
+#content li { margin: 0.35em 0; }
+#content blockquote {
+  border-left: 3px solid #d0d0d0;
+  padding-left: 14px;
+  margin: 1em 0;
+  color: #444;
+  background: rgba(0,0,0,0.02);
+}
+#content pre, #content code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+#content pre {
+  padding: 12px;
+  background: #f7f7f7;
+  border-radius: 6px;
+  overflow: auto;
+}
+#content img, #content video { max-width: 100%; height: auto; }
+.katex-display, .katex { font-size: 1.08em; }
+
+/* Avoid splitting equations across pages */
+.katex-display { page-break-inside: avoid; break-inside: avoid; margin: 0.75em 0; }
+figure, blockquote, table { page-break-inside: avoid; break-inside: avoid; }
+
+/* Print rules */
+@media print {
+  #header { display: none; }
+  @page { margin: 12mm; }
+  body { color: #000; }
+}
