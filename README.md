@@ -28,6 +28,7 @@
 3. Optional: `bash src/scripts/pack.sh` to generate the zip for the web store. 
 
 ## License
+Licensed under the MIT License — see [LICENSE](./LICENSE) for details.
 
 ## Support / Issues
-Link
+`https://github.com/DylanMcCavitt/notebooklm-exporter/issues`
