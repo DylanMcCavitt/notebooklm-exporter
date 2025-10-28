@@ -1,4 +1,4 @@
-// background.js (MV3 module) — minimal
+// background.js 
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === "NLM_OPEN_PRINT" && msg.payload) {
@@ -14,6 +14,6 @@ async function openPrintTab(payload) {
   // Session storage is ephemeral; nothing persists after the browser session.
   await chrome.storage.session.set({ [key]: payload });
 
-  const url = chrome.runtime.getURL("print.html") + `?key=${encodeURIComponent(key)}`;
+  const url = chrome.runtime.getURL("src/print.html") + `?key=${encodeURIComponent(key)}`;
   await chrome.tabs.create({ url });
 }

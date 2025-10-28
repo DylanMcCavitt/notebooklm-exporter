@@ -20,7 +20,7 @@ async function collectAndOpen(mode) {
         try {
             await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
-                files: ["content.js"]
+                files: ["src/content.js"]
             });
             payload = await chrome.tabs.sendMessage(tab.id, message);
         } catch(err2) {
