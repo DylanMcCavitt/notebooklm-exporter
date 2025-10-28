@@ -2,8 +2,10 @@
 
 ## Screenshots
 ![Toolbar button](docs/screenshots/popup.png)
-![Export View](docs/screenshots/nlm_in_page.png)
-![PDF View](docs/screenshots/nlm_export.png)
+
+![Export View](docs/screenshots/nlm-export.png)
+
+![PDF View](docs/screenshots/nlm-view-with-button.png)
 
 ## Features
 - Export NotebookLM chats/notes to a print-friendly page or downloadable PDF.
