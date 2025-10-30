@@ -109,16 +109,40 @@
       return notes;
     }
 
-    const main = document.querySelector("main") || document.body;
-    debug("falling back to main/document", main ? main.tagName : "<none>");
-    return main ? main.innerHTML : document.documentElement.innerHTML;
+    const ensureContent = (html) => (html && html.replace(/\s+/g, "").length ? html : null);
+
+    const main = document.querySelector("main");
+    if (main) {
+      debug("falling back to main", main.tagName);
+      const mainHtml = ensureContent(collectMessagesHtml(main));
+      if (mainHtml) return mainHtml;
+      const mainLoose = ensureContent(collectMessagesHtml(main, { ignoreVisibility: true }));
+      if (mainLoose) return mainLoose;
+      const mainRaw = ensureContent(main.innerHTML);
+      if (mainRaw) return mainRaw;
+    }
+
+    debug("falling back to body/document");
+    const bodyHtml = ensureContent(collectMessagesHtml(document.body));
+    if (bodyHtml) return bodyHtml;
+    const bodyLoose = ensureContent(collectMessagesHtml(document.body, { ignoreVisibility: true }));
+    if (bodyLoose) return bodyLoose;
+    const bodyRaw = ensureContent(document.body.innerHTML);
+    if (bodyRaw) return bodyRaw;
+
+    return ensureContent(document.documentElement.innerHTML) || document.documentElement.innerHTML;
   };
 
   const exportChatOrNotes = async () => {
     const html = await gatherExportHtml();
-    if (!html || html.replace(/\s+/g, "").length < 50) {
+    const textLength = html ? html.replace(/<[^>]+>/g, "").replace(/\s+/g, "").length : 0;
+    if (!html || textLength === 0) {
       showToast("Couldn’t find chat/notes here. Scroll or select text and try again.");
-      console.warn(`${TAG} export aborted — insufficient HTML`, html ? html.slice(0, 120) : "<empty>");
+      console.warn(
+        `${TAG} export aborted — insufficient HTML`,
+        html ? html.slice(0, 120) : "<empty>",
+        `(text length: ${textLength})`
+      );
       return;
     }
     await sendToPrintPage(html);
@@ -140,11 +164,30 @@
       try {
         const toolbar = findChatToolbar();
         const loc = findChatPanelFromToolbar(toolbar);
-        const html =
+        const ensureContent = (value) => (value && value.replace(/\s+/g, "").length ? value : null);
+
+        let html =
           getSelectionHtml() ||
           (loc?.area ? collectMessagesHtml(loc.area) : null) ||
-          guessNotebookLMNotes() ||
-          (document.querySelector("main") || document.body).innerHTML;
+          guessNotebookLMNotes();
+
+        if (!html) {
+          const mainEl = document.querySelector("main");
+          if (mainEl) {
+            html =
+              ensureContent(collectMessagesHtml(mainEl)) ||
+              ensureContent(collectMessagesHtml(mainEl, { ignoreVisibility: true })) ||
+              ensureContent(mainEl.innerHTML);
+          }
+        }
+
+        if (!html) {
+          html =
+            ensureContent(collectMessagesHtml(document.body)) ||
+            ensureContent(collectMessagesHtml(document.body, { ignoreVisibility: true })) ||
+            ensureContent(document.body.innerHTML) ||
+            document.body.innerHTML;
+        }
 
         sendResponse({
           ok: !!html,

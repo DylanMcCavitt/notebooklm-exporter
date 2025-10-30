@@ -9,7 +9,10 @@
     "128": "src/assets/icon128.png"
   },
   "permissions": ["activeTab", "scripting", "storage"],
-  "host_permissions": ["https://notebooklm.google.com/*"],
+  "host_permissions": [
+    "https://notebooklm.google.com/*",
+    "https://ogs.google.com/*"
+  ],
   "background": {
     "service_worker": "src/background.js",
     "type": "module"
@@ -27,7 +30,21 @@
         "src/content/ui.js",
         "src/content/export.js"
       ],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": true
+    },
+    {
+      "matches": ["https://ogs.google.com/*"],
+      "js": [
+        "src/content/helpers.js",
+        "src/content/dom.js",
+        "src/content/ui.js",
+        "src/content/export.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": true
     }
   ],
   "web_accessible_resources": [

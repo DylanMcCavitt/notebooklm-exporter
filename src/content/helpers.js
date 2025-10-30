@@ -4,21 +4,63 @@
   const TAG = "[NotebookLM-PDF]";
   const state = { lastChatArea: null };
 
-  const DEBUG_ENABLED = (() => {
+  const isDebugEnabled = () => {
     try { return !!window.localStorage?.getItem("nlmExportDebug"); }
     catch (_e) { return false; }
-  })();
+  };
 
   const debug = (...args) => {
-    if (DEBUG_ENABLED) console.debug(TAG, ...args);
+    if (isDebugEnabled()) console.debug(TAG, ...args);
   };
 
   const qsa = (sel, root = document) => {
-    try { return Array.from(root.querySelectorAll(sel)); }
-    catch (e) {
-      console.warn(`${TAG} bad selector skipped: ${sel}`, e);
+    const results = [];
+    const seen = new Set();
+    let selectors = null;
+
+    const matchesSelector = (el) => {
+      try {
+        return el.matches(sel);
+      } catch (err) {
+        if (!selectors) {
+          selectors = sel.split(',').map((s) => s.trim()).filter(Boolean);
+        }
+        return selectors.some((s) => {
+          try { return el.matches(s); }
+          catch (_e) { return false; }
+        });
+      }
+    };
+
+    const visit = (node) => {
+      if (!node || seen.has(node)) return;
+      seen.add(node);
+
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node;
+        if (matchesSelector(el)) results.push(el);
+        if (el.shadowRoot) visit(el.shadowRoot);
+        for (let i = 0; i < el.children.length; i++) {
+          visit(el.children[i]);
+        }
+        return;
+      }
+
+      if (node instanceof Document || node instanceof DocumentFragment) {
+        const childNodes = node.childNodes || [];
+        for (let i = 0; i < childNodes.length; i++) {
+          if (childNodes[i].nodeType === Node.ELEMENT_NODE) visit(childNodes[i]);
+        }
+      }
+    };
+
+    try {
+      visit(root);
+    } catch (e) {
+      console.warn(`${TAG} traversal failed for selector: ${sel}`, e);
       return [];
     }
+    return results;
   };
 
   const isVisible = (el) => {
@@ -62,6 +104,8 @@
       wrap.appendChild(frag);
       container.appendChild(wrap);
     }
+    const textLength = (container.textContent || "").replace(/\s+/g, "").length;
+    if (!textLength) return null;
     return container.innerHTML;
   };
 
@@ -102,6 +146,7 @@
     TAG,
     state,
     debug,
+    debugEnabled: isDebugEnabled,
     qsa,
     isVisible,
     escapeHtml,

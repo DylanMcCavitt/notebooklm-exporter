@@ -21,6 +21,48 @@ body {
   font-size: 15px;
   line-height: 1.6;
 }
+
+#content mat-card.mat-mdc-card {
+  display: block;
+  margin: 20px 0;
+  border-radius: 14px;
+  border: 1px solid #e1e7ef;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  background: #fff;
+  overflow: hidden;
+}
+
+#content mat-card.mat-mdc-card.from-user-message-card-content {
+  background: linear-gradient(180deg, #fdfefe 0%, #f8fbff 100%);
+  border-color: #e7eef7;
+}
+
+#content mat-card.mat-mdc-card.to-user-message-card-content {
+  border-color: #cdd9ff;
+  background: linear-gradient(180deg, #f7f9ff 0%, #f0f4ff 100%);
+}
+
+#content mat-card-content.message-content {
+  display: block;
+  padding: 20px 26px;
+}
+
+#content .message-text-content > *:first-child { margin-top: 0; }
+#content .message-text-content > *:last-child { margin-bottom: 0; }
+#content .message-text-content p { margin: 0.8em 0; }
+#content .message-text-content ul,
+#content .message-text-content ol { margin: 0.8em 0 0.8em 1.7em; }
+#content .message-text-content li { margin: 0.45em 0; }
+#content .message-text-content p + ol { margin-top: 1em; }
+#content .message-text-content ol + p { margin-top: 1em; }
+#content .message-text-content ol > li + li { margin-top: 0.55em; }
+#content .message-text-content ol > li::marker {
+  font-weight: 600;
+  color: #394867;
+}
+#content mat-card-actions,
+#content chat-actions { display: none !important; }
+
 #content h1, #content h2, #content h3 { margin-top: 1.4em; line-height: 1.35; }
 #content p { margin: 0.65em 0; }
 #content ul, #content ol { margin: 0.65em 0; padding-left: 28px; }
@@ -43,6 +85,17 @@ body {
 }
 #content img, #content video { max-width: 100%; height: auto; }
 .katex-display, .katex { font-size: 1.08em; }
+#content math {
+  display: block;
+  margin: 0.75em auto;
+  font-size: 1.08em;
+}
+#content annotation { display: none !important; }
+#content hr.nlm-divider {
+  border: 0;
+  border-top: 2px solid #d7e0ee;
+  margin: 32px 0 26px;
+}
 
 /* Avoid splitting equations across pages */
 .katex-display { page-break-inside: avoid; break-inside: avoid; margin: 0.75em 0; }

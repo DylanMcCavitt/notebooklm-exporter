@@ -1,13 +1,65 @@
 // print.js (module)
 
+const decodeHtmlEntities = (() => {
+  const textarea = document.createElement("textarea");
+  return (str) => {
+    if (!str || str.indexOf("&") === -1) return str;
+    textarea.innerHTML = str;
+    return textarea.value;
+  };
+})();
+
+const LATEX_COMMANDS = [
+  "\\\\frac",
+  "\\\\sqrt",
+  "\\\\int",
+  "\\\\sum",
+  "\\\\prod",
+  "\\\\displaystyle",
+  "\\\\over",
+  "\\\\binom",
+  "\\\\lim",
+  "\\\\log",
+  "\\\\ln",
+  "\\\\exp",
+  "\\\\sin",
+  "\\\\cos",
+  "\\\\tan",
+  "\\\\theta",
+  "\\\\phi",
+  "\\\\pi",
+  "\\\\Gamma",
+  "\\\\beta",
+  "\\\\alpha",
+  "\\\\gamma",
+  "\\\\lambda",
+  "\\\\sigma",
+  "\\\\rho",
+  "\\\\mu",
+  "\\\\nu",
+  "\\\\omega",
+  "\\\\cdot",
+  "\\\\times",
+  "\\\\leq",
+  "\\\\geq",
+  "\\\\neq",
+  "\\\\approx",
+  "\\\\rightarrow",
+  "\\\\mapsto",
+  "\\\\begin\\{cases\\}",
+  "\\\\begin\\{align",
+  "\\\\begin\\{array"
+];
+
 function sanitize(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html || "", "text/html");
-  doc.querySelectorAll("script, iframe, object, embed").forEach(el => el.remove());
-  doc.querySelectorAll("*").forEach(el => {
-    [...el.attributes].forEach(attr => {
-      if (/^on/i.test(attr.name)) el.removeAttribute(attr.name); // strip onClick/onLoad/...
-      if (attr.name === "srcdoc") el.removeAttribute("srcdoc");
+  doc.querySelectorAll("script, iframe, object, embed").forEach((el) => el.remove());
+  doc.querySelectorAll("*").forEach((el) => {
+    [...el.attributes].forEach((attr) => {
+      if (/^on/i.test(attr.name)) el.removeAttribute(attr.name);
+      if (attr.name === "srcdoc") el.removeAttribute(attr.name);
+      if (/^_?ng/.test(attr.name)) el.removeAttribute(attr.name);
     });
   });
   return doc.body.innerHTML;
@@ -33,11 +85,11 @@ function normalizeCitations(root) {
     "[role='doc-footnote']"
   ];
 
-  selectors.forEach(sel => {
-    root.querySelectorAll(sel).forEach(node => removeQueue.add(node));
+  selectors.forEach((sel) => {
+    root.querySelectorAll(sel).forEach((node) => removeQueue.add(node));
   });
 
-  root.querySelectorAll("span, div, button").forEach(node => {
+  root.querySelectorAll("span, div, button").forEach((node) => {
     const cls = node.className || "";
     const label = (node.getAttribute("aria-label") || node.getAttribute("title") || "").toLowerCase();
     if (/reference|citation|footnote|source/i.test(cls) || /reference|citation|footnote|source/.test(label)) {
@@ -48,7 +100,7 @@ function normalizeCitations(root) {
     if (text && /^\d{1,3}$/.test(text)) removeQueue.add(node);
   });
 
-  removeQueue.forEach(node => {
+  removeQueue.forEach((node) => {
     const prev = node.previousSibling;
     if (prev && prev.nodeType === Node.TEXT_NODE && !/\s$/.test(prev.textContent || "")) {
       prev.textContent += " ";
@@ -86,7 +138,7 @@ function cleanupLatexArtifacts(root) {
       .replace(/\$([\s\S]*?)\$(\d{1,3})\s*\}/g, (_match, inner) => `$${inner}$`)
       .replace(/\$\$(\d{1,3})\s*\}/g, () => "$$")
       .replace(/\$(\d{1,3})\s*\}/g, () => "$")
-      .replace(/\\text\s*\{([^}]*)\}/g, (_m, inner) => inner); // strip stray \text{} wrappers
+      .replace(/\\text\s*\{([^}]*)\}/g, (_m, inner) => inner);
     if (text !== original) node.textContent = text;
   }
 }
@@ -118,6 +170,45 @@ function ensureDisplayWrappers(root) {
   }
 }
 
+function promoteBareLatex(root) {
+  if (!root) return;
+  const selectors = ["p", "span", "li", "div"];
+  root.querySelectorAll(selectors.join(",")).forEach((node) => {
+    if (node.children.length) return;
+    if (node.closest(".katex") || node.closest("math")) return;
+    let text = (node.textContent || "").trim();
+    if (!text) return;
+    const decoded = decodeHtmlEntities(text);
+    if (decoded !== text) {
+      text = decoded;
+      node.textContent = decoded;
+    }
+    if (/^\$\$[\s\S]*\$\$$/.test(text) || /^\$[\s\S]*\$/.test(text)) return;
+    if (!text.includes("\\")) return;
+    const looksLikeMath = LATEX_COMMANDS.some((cmd) => text.includes(cmd));
+    if (!looksLikeMath) return;
+    const display =
+      /\\(begin|displaystyle|int|sum|prod|frac|cases|align|array)/.test(text) ||
+      text.includes("\\\\") ||
+      text.length > 80;
+    node.textContent = display ? `$$${text}$$` : `$${text}$`;
+  });
+}
+
+function convertDividerParagraphs(root) {
+  if (!root) return;
+  root.querySelectorAll("p").forEach((p) => {
+    if (p.children.length) return;
+    const text = (p.textContent || "").trim();
+    if (!text) return;
+    if (/^[-_]{3,}$/.test(text)) {
+      const hr = document.createElement("hr");
+      hr.className = "nlm-divider";
+      p.replaceWith(hr);
+    }
+  });
+}
+
 async function main() {
   const params = new URLSearchParams(location.search);
   const key = params.get("key");
@@ -132,11 +223,12 @@ async function main() {
 
   const content = document.getElementById("content");
   content.innerHTML = sanitize(html);
+  convertDividerParagraphs(content);
   normalizeCitations(content);
   cleanupLatexArtifacts(content);
+  promoteBareLatex(content);
   ensureDisplayWrappers(content);
 
-  // Render math with KaTeX auto-render
   const delimiters = mathDelimiters || [
     { left: "$$", right: "$$", display: true },
     { left: "\\[", right: "\\]", display: true },
@@ -156,19 +248,21 @@ async function main() {
 
   document.getElementById("btn-print").addEventListener("click", () => window.print());
 
-  document.getElementById("btn-save").addEventListener("click", async () => {
-    if (!window.html2pdf) return alert("html2pdf is not available.");
-    await html2pdf()
-      .set({
-        margin: 10,
-        filename: makeFileName(title),
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
-      })
-      .from(content)
-      .save();
-  });
+  document
+    .getElementById("btn-save")
+    .addEventListener("click", async () => {
+      if (!window.html2pdf) return alert("html2pdf is not available.");
+      await html2pdf()
+        .set({
+          margin: 10,
+          filename: makeFileName(title),
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+        })
+        .from(content)
+        .save();
+    });
 }
 
 main();
