@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "NotebookLM → PDF (with Math)",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Export NotebookLM chat/notes to PDF with properly rendered math (KaTeX).",
   "icons": {
     "16": "src/assets/icon16.png",
